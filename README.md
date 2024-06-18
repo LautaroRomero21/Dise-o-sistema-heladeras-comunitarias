@@ -1,73 +1,70 @@
-# tp-anual-diseño
+# Getting Started with Create React App
 
-Tecnologías Utilizadas
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-    Backend:
-        Spring Boot
-        Java 17
+## Available Scripts
 
-    Frontend:
-        React
-        React Bootstrap
-        React Google Maps API
+In the project directory, you can run:
 
-    Gestor de Paquetes:
-        Yarn
+### `npm start`
 
-Variables de Entorno
+Runs the app in the development mode.\
+Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 
-Para mantener segura nuestra API key, sigue estos pasos:
+The page will reload when you make changes.\
+You may also see any lint errors in the console.
 
-    En la raíz del proyecto(Front), crea un archivo llamado .env.local.
+### `npm test`
 
-    Dentro, añade la siguiente línea:
+Launches the test runner in the interactive watch mode.\
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-    REACT_APP_GOOGLE_MAPS_API_KEY=(Key dentro del docs , ingresar con un mail .frba.utn.edu.ar , sino les va a pedir permisos)
+### `npm run build`
 
-https://docs.google.com/document/d/1q6Z1KfbiKVK4Epo6AxTKiZKfk3pDTCAnS13loOJOi_U/edit?usp=sharing
+Builds the app for production to the `build` folder.\
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-Prerrequisitos
+The build is minified and the filenames include the hashes.\
+Your app is ready to be deployed!
 
-    Java 17
-    Node.js (incluye npm) 
-    Yarn
-Dependencias 
-    Yarn add react-bootstrap
-    yarn add @react-google-maps/api 
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-Clonar el Repositorio
+### `npm run eject`
 
-    Clona el repositorio para el backend:
+**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-    Clona el repositorio para el front : git clone https://github.com/PonceCamilo/tp-anual-disenio.git
+If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
+Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
 
+You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
+## Learn More
 
-Este contiene el backend en su raíz.
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-Clona el repositorio para el frontend:
+To learn React, check out the [React documentation](https://reactjs.org/).
 
-En otra carpeta, vuelve a clonar el repositorio, ingresa en la carpeta tp-anual-disenio, abre una terminal y ejecuta:
+### Code Splitting
 
-    git checkout front-end
+This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
 
-    Esto te permitirá tener una separación clara y un mejor control del backend y frontend a la hora de revisar.
+### Analyzing the Bundle Size
 
-Instalación de Dependencias
+This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
 
-    Front:
+### Making a Progressive Web App
 
-    En la carpeta donde clonaste el front, instala las dependencias y ejecuta la aplicación utilizando:
-    yarn add react-bootstrap
-    yarn add @react-google-maps/api
+This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
 
+### Advanced Configuration
 
-En la carpeta donde clonaste el frontend (tp-anual-disenio con la rama front-end), abre una terminal y ejecuta:
+This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
 
-    yarn start
+### Deployment
 
-Orden de Inicio
+This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
 
-Para asegurar que el API esté corriendo antes de que el frontend lo solicite, inicia primero el backend y luego el frontend.
-PD: El workspace del back tarda en cargar
+### `npm run build` fails to minify
+
+This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
