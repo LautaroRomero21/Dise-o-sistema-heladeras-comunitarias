@@ -1,70 +1,49 @@
 package com.utndds.heladerasApi.models.Heladera;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Heladera {
+import com.utndds.heladerasApi.models.Rol.Colaborador;
+import com.utndds.heladerasApi.models.Rol.Tecnico;
+
+public class Heladera implements Observador {
     String nombre;
-    double longitud;
-    double latitud;
+    Ubicacion ubicacion;
     int capacidad;
     String direccion;
+    double ultimaTempRegistrada;
     double minTemp;
     double maxTemp;
     boolean estado;
     List<Observador> observadores = new ArrayList<>();
+    List<SolicitudApertura> solicitudes = new ArrayList<>();
     LocalDate fechaInicioFuncionamiento;
     List<Vianda> viandas = new ArrayList<>();
 
-    public Heladera(String nombre, double longitud, double latitud, int capacidad, String direccion, double minTemp,
-            double maxTemp,
-            boolean estado, LocalDate fechaInicioFuncionamiento, List<Vianda> viandas) {
+    public Heladera(String nombre, Ubicacion ubicacion, int capacidad, String direccion, double ultimaTempRegistrada,
+            double minTemp, double maxTemp, boolean estado, LocalDate fechaInicioFuncionamiento, List<Vianda> viandas,
+            List<SolicitudApertura> solicitudes) {
         this.nombre = nombre;
-        this.longitud = longitud;
-        this.latitud = latitud;
+        this.ubicacion = ubicacion;
         this.capacidad = capacidad;
         this.direccion = direccion;
+        this.ultimaTempRegistrada = ultimaTempRegistrada;
         this.minTemp = minTemp;
         this.maxTemp = maxTemp;
         this.estado = estado;
         this.fechaInicioFuncionamiento = fechaInicioFuncionamiento;
         this.viandas = viandas;
+        this.solicitudes = solicitudes;
     }
 
-    public void alta(Connection con) {
-        try {
-            String query = "INSERT INTO heladeras (Nombre, Longitud, Latitud, Direccion, F_funcionamiento, Cant_viandas) VALUES (?, ?, ?, ?, ?, ?)";
-            PreparedStatement pstmt = con.prepareStatement(query);
-            pstmt.setString(1, nombre);
-            pstmt.setDouble(2, longitud);
-            pstmt.setDouble(3, latitud);
-            pstmt.setString(4, direccion);
-            pstmt.setDate(5, java.sql.Date.valueOf(fechaInicioFuncionamiento));
-            pstmt.setString(6, String.valueOf(cantViandasDentro()));
-
-            int filasInsertadas = pstmt.executeUpdate();
-
-            if (filasInsertadas > 0) {
-                System.out.println("Heladera dada de alta exitosamente");
-            } else {
-                System.out.println("No se pudo dar de alta la heladera");
-            }
-        } catch (SQLException e) {
-            System.out.println("Error al insertar Heladera: " + e.getMessage());
-        }
+    public void setUltimaTempRegistrada(double ultimaTempRegistrada) {
+        this.ultimaTempRegistrada = ultimaTempRegistrada;
     }
 
-    public void baja() {
-        System.out.println("Se dio de baja la heladera: " + this.nombre);
-    }
-
-    public void modificar() {
-        System.out.println("Se modifico la heladera: " + this.nombre);
+    public String getNombre() {
+        return nombre;
     }
 
     public double getMinTemp() {
@@ -91,22 +70,8 @@ public class Heladera {
         return estado;
     }
 
-    public void extraerVianda() {
-        if (this.hayFraude()) {
-            for (Observador observador : observadores) {
-                observador.actualizar();
-            }
-            return;
-        }
-        viandas.remove(viandas.size() - 1);
-    }
-
     public int cantViandasDentro() {
         return viandas.size();
-    }
-
-    private boolean hayFraude() {
-        return true;
     }
 
     public int cantMesesActiva() {
@@ -118,6 +83,66 @@ public class Heladera {
 
     public void agregarObservador(Observador observador) {
         observadores.add(observador);
+    }
+
+    @Override
+    public void actualizar() {
+        if (this.ultimaTempRegistrada < this.minTemp || this.ultimaTempRegistrada > this.maxTemp) {
+            this.estado = false;
+        }
+    }
+
+    public void agregarSolicitud(SolicitudApertura solicitud) {
+        this.solicitudes.add(solicitud);
+    }
+
+    public void eliminarSolicitud(SolicitudApertura solicitud) {
+        this.solicitudes.remove(solicitud);
+    }
+
+    public void extraerVianda(Vianda vianda) {
+        if (this.hayFraude()) {
+            for (Observador observador : observadores) {
+                observador.actualizar();
+            }
+            return;
+        }
+        viandas.remove(vianda);
+    }
+
+    private boolean hayFraude() {
+        return true;
+    }
+
+    public void abrir(Colaborador colaborador) {
+        SolicitudApertura solicitudCorrespondiente = this.obtenerSolicitud(colaborador);
+        if (solicitudCorrespondiente != null) {
+            System.out.println("El colaborador abrio la heladera con exito");
+            this.solicitudes.remove(solicitudCorrespondiente);
+            return;
+        } else {
+            System.out.println("El colaborador no hizo solicitud o la misma expiro");
+        }
+
+    }
+
+    public SolicitudApertura obtenerSolicitud(Colaborador colaborador) {
+        for (SolicitudApertura solicitud : solicitudes) {
+            if (solicitud.getColaborador().equals(colaborador)) {
+                return solicitud;
+            }
+        }
+        return null;
+    }
+
+    public void verificarSuscripciones() {
+    }
+
+    public void notificarDesperfecto() {
+    }
+
+    public Tecnico tecnicoMasCercano() {
+        return null;
     }
 
     public static void main(String[] args) {
