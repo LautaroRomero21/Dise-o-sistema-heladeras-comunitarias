@@ -21,7 +21,7 @@ public class Colaborador {
     }
 
     public void realizarColaboracion(Colaboracion colaboracion) {
-        colaboracion.realizar();
+        colaboracion.procesar();
         colaboraciones.add(colaboracion);
     }
 

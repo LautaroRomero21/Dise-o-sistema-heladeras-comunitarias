@@ -5,24 +5,41 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.utndds.heladerasApi.models.Heladera.Ubicacion;
+import com.utndds.heladerasApi.models.Heladera.Punto;
 
 import org.springframework.stereotype.Service;
 
 @Service
 public class GoogleMapsService {
+    private static volatile GoogleMapsService instancia;
 
-    public List<Ubicacion> obtenerUbicaciones() {
-        List<Ubicacion> ubicaciones = new ArrayList<>();
+    // Constructor privado para evitar la instanciación directa
+    private GoogleMapsService() {
+    }
+
+    // Método público para obtener la instancia única
+    public static GoogleMapsService getInstance() {
+        if (instancia == null) {
+            synchronized (GoogleMapsService.class) {
+                if (instancia == null) {
+                    instancia = new GoogleMapsService();
+                }
+            }
+        }
+        return instancia;
+    }
+
+    public List<Punto> obtenerUbicaciones() {
+        List<Punto> ubicaciones = new ArrayList<>();
 
         try {
 
             InputStream inputStream = getClass().getResourceAsStream("/direcciones-heladeras.json");
 
             ObjectMapper objectMapper = new ObjectMapper();
-            Ubicacion[] ubicacionesArray = objectMapper.readValue(inputStream, Ubicacion[].class);
+            Punto[] ubicacionesArray = objectMapper.readValue(inputStream, Punto[].class);
 
-            for (Ubicacion ubicacion : ubicacionesArray) {
+            for (Punto ubicacion : ubicacionesArray) {
                 ubicaciones.add(ubicacion);
             }
         } catch (IOException e) {
