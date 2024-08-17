@@ -1,4 +1,4 @@
-package com.utndds.heladerasApi.models.Heladera;
+package com.utndds.heladerasApi.models.Solicitudes;
 
 import java.io.File;
 
@@ -14,17 +14,49 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
+import com.utndds.heladerasApi.models.Heladera.Heladera;
+import com.utndds.heladerasApi.models.ONG.ONG;
 import com.utndds.heladerasApi.models.Rol.Colaborador;
-import com.utndds.heladerasApi.models.Sistema.Sistema;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Entity
+@Table(name = "solicitud_apertura")
 public class SolicitudApertura {
-    Colaborador colaborador;
-    Heladera heladera;
-    LocalDateTime fechaHora;
-    String motivo;
-    boolean estado;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    @Getter
+    @Setter
+    private Long id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "colaborador")
+    private Colaborador colaborador;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "heladera")
+    private Heladera heladera;
+
+    @Column(name = "fecha_hora")
+    private LocalDateTime fechaHora;
+
+    @Column(name = "motivo")
+    private String motivo;
+
+    @Column(name = "estado")
+    private boolean estado;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ong") // Nombre de la columna que se refiere a la ONG
+    private ONG ong;
+    @Transient
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    @Transient
     private static final String EXCHANGE_NAME = "solicitudApertura";
+
+    // Constructor vacío para JPA
+    public SolicitudApertura() {
+    }
 
     public SolicitudApertura(Colaborador colaborador, Heladera heladera, String motivo) {
         this.colaborador = colaborador;
@@ -37,7 +69,7 @@ public class SolicitudApertura {
     }
 
     private void procesar() {
-        Sistema.getInstance().agregarSolicitud(this);
+        ONG.getInstance().agregarSolicitud(this);
         this.iniciarTemporizador();
         this.publicarSolicitud();
     }

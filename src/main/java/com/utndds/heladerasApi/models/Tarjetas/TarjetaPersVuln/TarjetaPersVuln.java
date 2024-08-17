@@ -11,16 +11,28 @@ import com.utndds.heladerasApi.models.Heladera.Heladera;
 import com.utndds.heladerasApi.models.Rol.PersonaVulnerable;
 import com.utndds.heladerasApi.models.Tarjetas.Tarjeta;
 
+import jakarta.persistence.*;
+
 import java.time.Duration;
 
+@Entity
 public class TarjetaPersVuln extends Tarjeta {
-    String codigo;
-    PersonaVulnerable persVul;
-    int cantUsosHoy;
-    List<UsoHeladera> usos = new ArrayList<>();
 
-    public TarjetaPersVuln(String codigo) {
-        this.codigo = codigo;
+    @Column(name = "codigo")
+    private String codigo;
+
+    @Column(name = "cant_usos_hoy")
+    private int cantUsosHoy;
+    @OneToMany(mappedBy = "tarjeta", cascade = CascadeType.ALL)
+    private List<UsoHeladera> usos = new ArrayList<>();
+
+    public TarjetaPersVuln() {
+        super(null); // Necesario para JPA
+        this.cantUsosHoy = 0;
+    }
+
+    public TarjetaPersVuln(PersonaVulnerable personaVulnerable) {
+        super(personaVulnerable);
         this.cantUsosHoy = 0;
 
         this.programarReinicioDeUsos();
@@ -51,7 +63,7 @@ public class TarjetaPersVuln extends Tarjeta {
     }
 
     private int extraccionesDiariasPermitidas() {
-        return 4 + 2 * this.persVul.getCantMenoresAcargo();
+        return 4 + 2 * this.dueño.getCantMenoresAcargo();
     }
 
     protected void usar(Heladera heladera) {
@@ -63,11 +75,8 @@ public class TarjetaPersVuln extends Tarjeta {
         this.cantUsosHoy++;
     }
 
-    public void setPersVul(PersonaVulnerable persVul) {
-        this.persVul = persVul;
-    }
-
     public String getCodigo() {
         return this.codigo;
     }
+
 }
