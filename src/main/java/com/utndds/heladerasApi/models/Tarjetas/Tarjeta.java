@@ -10,9 +10,9 @@ public abstract class Tarjeta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    protected Long id;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "dueño")
     protected Rol dueño;
 

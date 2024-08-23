@@ -43,6 +43,7 @@ public class Heladera implements ObservadorHeladera {
 
     @Column(name = "abierta")
     boolean abierta;
+
     @OneToOne(mappedBy = "heladera", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     ManejadorTemperatura manejadorTemperatura;
 
