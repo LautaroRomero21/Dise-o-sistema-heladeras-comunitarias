@@ -1,4 +1,4 @@
-.publicar-producto-page {
+.distribucion-viandas-page {
     display: flex;
     background-image: url(../../assets/imgs/bg.jpg);
     height: 100vh;
@@ -39,7 +39,7 @@
 }
 
 @media screen and (max-width: 768px) {
-    .publicar-producto-page {
+    .distribucion-viandas-page {
         flex-direction: column;
     }
 
@@ -52,5 +52,29 @@
     .right-side {
         padding: 20px;
         animation: slideInBottom 1s ease-in-out forwards;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
     }
 }

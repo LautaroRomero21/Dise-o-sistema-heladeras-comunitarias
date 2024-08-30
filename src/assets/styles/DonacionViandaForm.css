@@ -1,0 +1,70 @@
+.donacion-vianda-form {
+    background-color: white;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.donacion-vianda-form .form-group {
+    margin-bottom: 20px;
+}
+
+.donacion-vianda-form label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.donacion-vianda-form input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+.donacion-vianda-form input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.submit-button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease-in-out;
+    width: 100%;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
+
+@media screen and (max-width: 768px) {
+    .donacion-vianda-page {
+        flex-direction: column;
+    }
+
+    .left-side {
+        text-align: center;
+        padding: 30px;
+        animation: slideInTop 1s ease-in-out forwards;
+    }
+
+    .right-side {
+        padding: 20px;
+        animation: slideInBottom 1s ease-in-out forwards;
+    }
+
+    .donacion-vianda-form {
+        max-width: 100%;
+    }
+}

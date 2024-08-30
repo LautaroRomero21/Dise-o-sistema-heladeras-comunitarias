@@ -1,21 +1,15 @@
-.report-issue-page {
-    padding: 30px;
+/* DonacionDineroPage.css */
+
+.donacion-dinero-page {
+    display: flex;
+    height: 100vh;
     background-image: url(../../assets/imgs/bg.jpg);
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
+    font-family: 'Arial', sans-serif;
+    overflow: auto;
 }
-
-.report-issue-page h2 {
-    font-size: 24px;
-    animation: slideInLeft 1s ease-out forwards;
-}
-
 
 .left-side {
     flex: 1;

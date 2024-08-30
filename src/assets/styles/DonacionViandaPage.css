@@ -1,26 +1,16 @@
-.report-issue-page {
-    padding: 30px;
-    background-image: url(../../assets/imgs/bg.jpg);
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: cover;
-    min-height: 100vh;
+.donacion-vianda-page {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
+    background-image: url(../../assets/imgs/bg.jpg);
+    height: 100vh;
+    background-color: #f7f8fa;
+    font-family: 'Arial', sans-serif;
+    overflow: auto;
 }
-
-.report-issue-page h2 {
-    font-size: 24px;
-    animation: slideInLeft 1s ease-out forwards;
-}
-
 
 .left-side {
     flex: 1;
     padding: 50px;
-    background-color: rgba(0, 0, 0, 0.7);
+    background-color: #343a40;
     color: white;
     display: flex;
     flex-direction: column;

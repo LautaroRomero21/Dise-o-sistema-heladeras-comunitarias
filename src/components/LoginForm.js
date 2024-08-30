@@ -16,7 +16,7 @@ function LoginForm({ onRegisterClick }) {
       </Form.Group>
 
       <Form.Group className='mt-3' controlId="formBasicCheckbox">
-        <Form.Check type="checkbox" label="Recuérdame"/>
+        <Form.Check type="checkbox" label="Recuérdame" />
       </Form.Group>
       <div className="d-grid gap-2">
         <Button className='mt-3' variant="primary" type="submit">
