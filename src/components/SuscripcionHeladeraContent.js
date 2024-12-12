@@ -1,149 +1,352 @@
-import React, { useState } from 'react';
-import '../assets/styles/SuscripcionHeladeraContent.css';
+import React, { useState, useEffect } from 'react';
+import {
+    Box,
+    Input,
+    Button,
+    Text,
+    Grid,
+    Image,
+    Heading,
+    Flex,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalBody,
+    ModalCloseButton,
+    VStack,
+    FormControl,
+    Checkbox,
+    CheckboxGroup,
+    HStack,
+    useDisclosure,
+    useToast,
+    Spinner,
+} from '@chakra-ui/react';
+import { useAuth } from '../config/authContext';
+import IcoHeladera from '../assets/iconos/Food.svg';
 
-const heladeras = [
-    { id: 1, nombre: 'Heladera 1', descripcion: 'Descripción de la Heladera 1', imagen: 'https://via.placeholder.com/150' },
-    { id: 2, nombre: 'Heladera 2', descripcion: 'Descripción de la Heladera 2', imagen: 'https://via.placeholder.com/150' },
-    { id: 3, nombre: 'Heladera 3', descripcion: 'Descripción de la Heladera 3', imagen: 'https://via.placeholder.com/150' },
-    { id: 4, nombre: 'Heladera 4', descripcion: 'Descripción de la Heladera 4', imagen: 'https://via.placeholder.com/150' },
-    { id: 5, nombre: 'Heladera 5', descripcion: 'Descripción de la Heladera 5', imagen: 'https://via.placeholder.com/150' },
-    { id: 6, nombre: 'Heladera 6', descripcion: 'Descripción de la Heladera 6', imagen: 'https://via.placeholder.com/150' },
-    // Agrega más heladeras si es necesario
-];
+const HeladeraCard = ({ heladera, onSuscribirse }) => (
+    <Box
+        p={3}
+        bg="gray.200"
+        borderRadius="lg"
+        boxShadow="md"
+        textAlign="center"
+        transition="transform 0.3s, box-shadow 0.3s"
+        _hover={{ transform: 'scale(1.05)', boxShadow: 'lg' }}
+        width="200px"
+        height="280px"
+        display="flex"
+        flexDirection="column"
+        alignItems="center"
+        justifyContent="space-between"
+    >
+        <Flex justifyContent="center" alignItems="center" mb={3} height="100px">
+            <Image
+                src={IcoHeladera}
+                alt={heladera.nombrePunto}
+                borderRadius="md"
+                maxHeight="80px"
+                maxWidth="100%"
+            />
+        </Flex>
+        <Heading size="sm" mb={2} fontSize="16px" textAlign="center" noOfLines={2}>
+            {heladera.nombrePunto}
+        </Heading>
+        <Button
+            mt={3}
+            size="sm"
+            colorScheme="green"
+            onClick={() => onSuscribirse(heladera)}
+            width="100%"
+        >
+            Suscribirse
+        </Button>
+    </Box>
+);
 
 function SuscripcionHeladeraContent() {
-    const [formVisible, setFormVisible] = useState(false);
-    const [selectedHeladera, setSelectedHeladera] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [notificationSettings, setNotificationSettings] = useState({
-        case1: false,
-        case2: false,
-        case3: false,
-    });
-    const [viandasNumber, setViandasNumber] = useState({
-        case1: '',
-        case2: ''
-    });
+    const [heladeras, setHeladeras] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const [selectedHeladera, setSelectedHeladera] = useState(null);
+    const [tiposEventosSeleccionados, setTiposEventosSeleccionados] = useState([]);
+    const [tiposContactosSeleccionados, setTiposContactosSeleccionados] = useState([]);
+    const [viandasNumberMax, setViandasNumberMax] = useState('');
+    const [viandasNumberMin, setViandasNumberMin] = useState('');
+    const [contactos, setContactos] = useState([]);
+    const { accessToken, userSub } = useAuth();
+    const [loadingSuscripcion, setSuscripcion] = useState(null);
+    const toast = useToast();
+
+    useEffect(() => {
+        const fetchContactos = async () => {
+            try {
+                const response = await fetch(`https://heladeras-dds-back.onrender.com/users/contactos?UUID=${userSub}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+
+                if (!response.ok) throw new Error('Error al cargar los contactos.');
+                const data = await response.json();
+                // Mapear contactos recibidos
+                setContactos(
+                    data.map((contacto) => ({
+                        tipo: contacto.tipo,
+                        valor: contacto.valor,
+                    }))
+                );
+            } catch (error) {
+                toast({
+                    title: 'Error',
+                    description: error.message,
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+        };
+
+        fetchContactos();
+    }, [accessToken, toast]);
+    // Fetch de heladeras
+    useEffect(() => {
+        const abortController = new AbortController();
+
+        const fetchHeladeras = async () => {
+            setLoading(true);
+            try {
+                const response = await fetch('https://heladeras-dds-back.onrender.com/heladeras/listaHeladeras', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                    signal: abortController.signal,
+                });
+
+                if (!response.ok) throw new Error('Error al cargar las heladeras.');
+
+                const data = await response.json();
+                setHeladeras(data);
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    toast({
+                        title: 'Error',
+                        description: error.message,
+                        status: 'error',
+                        duration: 5000,
+                        isClosable: true,
+                    });
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchHeladeras();
+        return () => abortController.abort();
+    }, [accessToken, toast]);
 
     const handleSuscribirse = (heladera) => {
         setSelectedHeladera(heladera);
-        setFormVisible(true);
+        onOpen();
     };
-
-    const handleSubmit = (event) => {
-        event.preventDefault();
-        // Aquí puedes manejar la lógica de envío del formulario
-        alert('Formulario enviado');
-        setFormVisible(false); // Ocultar el formulario después de enviarlo
+    const colaboradorUUID = localStorage.getItem('sub');
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+    
+        const suscripcionDTO = {
+            colaboradorUUID: colaboradorUUID,
+            heladeraId: selectedHeladera?.id,
+            tiposEventosSeleccionados,
+            tiposContactosSeleccionados,
+            cantidadViandasMax: parseInt(viandasNumberMax, 10) || 0,
+            cantidadViandasMin: parseInt(viandasNumberMin, 10) || 0,
+        };
+    
+        try {
+            // Establecer el estado de carga
+            setSuscripcion(selectedHeladera?.id);
+            
+            const response = await fetch('https://heladeras-dds-back.onrender.com/suscripciones/suscribir', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify(suscripcionDTO),
+            });
+    
+            // Verifica el código de respuesta HTTP
+            if (response.ok) {
+                const result = await response.text();
+                console.log('Resultado:', result);
+                toast({
+                    title: 'Éxito',
+                    description: 'Colaborador suscrito exitosamente.',
+                    status: 'success',
+                    duration: 5000,
+                    isClosable: true,
+                });
+                onClose();
+            } else if (response.status === 409) {
+                // Si el código es 409, el colaborador ya está suscripto
+                toast({
+                    title: 'Advertencia',
+                    description: 'Usted ya está suscripto a esta heladera.',
+                    status: 'warning',
+                    duration: 5000,
+                    isClosable: true,
+                });
+                onClose();
+            } else {
+                // Si hay otro tipo de error, mostramos el mensaje de error
+                const errorText = await response.text();
+                throw new Error(errorText || 'Error al suscribir colaborador.');
+            }
+        } catch (error) {
+            console.error('Error al enviar la suscripción:', error);
+            toast({
+                title: 'Warning',
+                description: error.message || 'No se pudo completar la suscripción.',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
+        } finally {
+            // Desactivar el estado de carga
+            setSuscripcion(null);
+        }
     };
+    
 
-    const handleCheckboxChange = (event) => {
-        const { name, checked } = event.target;
-        setNotificationSettings(prevState => ({
-            ...prevState,
-            [name]: checked
-        }));
-    };
-
-    const handleViandasChange = (event) => {
-        const { name, value } = event.target;
-        setViandasNumber(prevState => ({
-            ...prevState,
-            [name]: value
-        }));
-    };
-
-    const filteredHeladeras = heladeras.filter(heladera =>
-        heladera.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredHeladeras = heladeras.filter((h) =>
+        h.nombrePunto.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
-        <div className="suscripcion-heladera-content-container">
-            <h2>Suscripción a Heladeras</h2>
-            <div className="search-container">
-                <input
-                    type="text"
-                    placeholder="Buscar por nombre..."
+        <Box
+            width="100%"
+            maxW="1300px"
+            minW="400px"
+            p={6}
+            bg="white"
+            borderRadius="lg"
+            boxShadow="lg"
+            overflowY="auto"
+            maxHeight="80vh"
+        >
+            <Box textAlign="center" mb={6}>
+                <Heading size="md" mb={1}>Suscripción a Heladeras</Heading>
+            </Box>
+            <Flex justifyContent="center" mb={6}>
+                <Input
+                    placeholder="Buscar heladera..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="search-input"
+                    width="250px"
+                    mr={2}
                 />
-                <button className="search-button">
-                    Buscar
-                </button>
-            </div>
-            <div className="heladeras-grid">
-                {filteredHeladeras.map(heladera => (
-                    <div key={heladera.id} className="heladera-card">
-                        <img src={heladera.imagen} alt={heladera.nombre} />
-                        <h3>{heladera.nombre}</h3>
-                        <p>{heladera.descripcion}</p>
-                        <button
-                            className="suscribirse-button"
-                            onClick={() => handleSuscribirse(heladera)}
-                        >
-                            Suscribirse
-                        </button>
-                    </div>
-                ))}
-            </div>
-            {formVisible && selectedHeladera && (
-                <div className="form-overlay">
-                    <div className="form-container">
-                        <h3>Formulario de Suscripción para {selectedHeladera.nombre}</h3>
-                        <form onSubmit={handleSubmit}>
-                            <div className="notification-settings">
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        name="case1"
-                                        checked={notificationSettings.case1}
-                                        onChange={handleCheckboxChange}
-                                    />
-                                    Quedan únicamente n viandas disponibles
-                                    <input
-                                        type="number"
-                                        name="case1"
-                                        value={viandasNumber.case1}
-                                        onChange={handleViandasChange}
-                                        min="1"
-                                        placeholder="Número de viandas"
-                                    />
-                                </label>
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        name="case2"
-                                        checked={notificationSettings.case2}
-                                        onChange={handleCheckboxChange}
-                                    />
-                                    Faltan n viandas para llenar la heladera
-                                    <input
-                                        type="number"
-                                        name="case2"
-                                        value={viandasNumber.case2}
-                                        onChange={handleViandasChange}
-                                        min="1"
-                                        placeholder="Número de viandas"
-                                    />
-                                </label>
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        name="case3"
-                                        checked={notificationSettings.case3}
-                                        onChange={handleCheckboxChange}
-                                    />
-                                    La heladera sufrió un desperfecto
-                                </label>
-                            </div>
-                            <button type="submit">Enviar</button>
-                            <button type="button" onClick={() => setFormVisible(false)}>Cancelar</button>
-                        </form>
-                    </div>
-                </div>
+            </Flex>
+            {loading ? (
+                <Text textAlign="center">Cargando heladeras...</Text>
+            ) : (
+                <Grid templateColumns="repeat(auto-fill, minmax(200px, 1fr))" gap={4} justifyItems="center">
+                    {filteredHeladeras.map((heladera) => (
+                        <HeladeraCard key={heladera.id} heladera={heladera} onSuscribirse={handleSuscribirse} />
+                    ))}
+                </Grid>
             )}
-        </div>
+
+<Modal isOpen={isOpen} onClose={onClose}>
+    <ModalOverlay />
+    <ModalContent>
+        <ModalHeader>Formulario de Suscripción para {selectedHeladera?.nombrePunto}</ModalHeader>
+        <ModalCloseButton />
+        
+        <ModalBody>
+            <form onSubmit={handleSubmit}>
+
+            <VStack spacing={4}>
+            <CheckboxGroup
+                        value={tiposEventosSeleccionados}
+                        onChange={(values) => setTiposEventosSeleccionados(values)}
+                    >
+                        <VStack align="start">
+                            <Text fontWeight="bold">Tipos de Eventos:</Text>
+                            <Checkbox value="POCAS_VIANDAS">Pocas Viandas</Checkbox>
+                            <Checkbox value="MUCHAS_VIANDAS">Muchas Viandas</Checkbox>
+                            <Checkbox value="FALLA_TECNICA">Falla Técnica</Checkbox>
+                        </VStack>
+                    </CheckboxGroup>
+                    </VStack>
+                    <br></br>
+                <VStack spacing={4}>
+                    {/* Mostrar contactos del usuario */}
+                    <CheckboxGroup
+                        value={tiposContactosSeleccionados}
+                        onChange={setTiposContactosSeleccionados}
+                    >
+                        <VStack align="start">
+                            <Text fontWeight="bold">Contactos Disponibles:</Text>
+                            {contactos.length === 0 ? (
+                                <Text>No tienes contactos disponibles.</Text>
+                            ) : (
+                                contactos.map((contacto, index) => (
+                                    <Checkbox key={index} value={contacto.tipo.toUpperCase()}>
+                                        {contacto.tipo}: {contacto.valor}
+                                    </Checkbox>
+                                ))
+                            )}
+                        </VStack>
+                    </CheckboxGroup>
+
+                    {/* Opciones de eventos */}
+                    
+
+                    {/* Inputs para viandas */}
+                    <FormControl>
+                        <Input
+                            placeholder="Cantidad de viandas Mínima"
+                            type="number"
+                            value={viandasNumberMin}
+                            onChange={(e) => setViandasNumberMin(e.target.value)}
+                            isDisabled={!tiposEventosSeleccionados.includes('POCAS_VIANDAS')}
+                        />
+                    </FormControl>
+                    <FormControl>
+                        <Input
+                            placeholder="Cantidad de viandas Máxima"
+                            type="number"
+                            value={viandasNumberMax}
+                            onChange={(e) => setViandasNumberMax(e.target.value)}
+                            isDisabled={!tiposEventosSeleccionados.includes('MUCHAS_VIANDAS')}
+                        />
+                    </FormControl>
+
+                    {/* Botones */}
+                    <HStack spacing={4}>
+                    <Button type="submit" colorScheme="green">
+                    {loadingSuscripcion === selectedHeladera?.id ? <Spinner size="sm" /> : 'Suscribirse'}
+                        </Button>
+                        <Button onClick={onClose} colorScheme="red">
+                            Cancelar
+                        </Button>
+                    </HStack>
+                </VStack>
+            </form>
+        </ModalBody>
+    </ModalContent>
+</Modal>
+
+
+        </Box>
     );
 }
 

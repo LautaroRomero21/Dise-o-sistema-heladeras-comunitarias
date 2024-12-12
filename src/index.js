@@ -1,17 +1,31 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import './assets/styles/styles.scss';
+
 import App from './App';
+import { Auth0Provider } from '@auth0/auth0-react';
+import { authConfig } from '../src/config/auth-config';
 import reportWebVitals from './reportWebVitals';
+import '@fontsource/manrope'; // Importa Manrope desde la biblioteca
+
+// Función para manejar el redireccionamiento después de la autenticación
+const onRedirectCallback = (appState) => {
+  window.history.replaceState(
+    {},
+    document.title,
+    appState?.returnTo || window.location.pathname
+  );
+};
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
+  <Auth0Provider
+    domain={authConfig.domain}
+    clientId={authConfig.clientId}
+    redirectUri={window.location.origin}
+    onRedirectCallback={onRedirectCallback} // Agrega la función de callback aquí
+  >
     <App />
-  </React.StrictMode>
+  </Auth0Provider>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();

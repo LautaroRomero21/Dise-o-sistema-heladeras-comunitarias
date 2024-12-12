@@ -1,46 +1,102 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../assets/styles/CustomContainer.css';
+import { Link as RouterLink } from 'react-router-dom';
+import { Box, Flex, Heading, Text, Button, Image, useBreakpointValue } from '@chakra-ui/react';
 import HeaderImage from '../assets/imgs/Header.png';
-
-
-function HeaderApp({ setHeaderHeight }) {
+import { useAuth } from '../config/authContext';
+function HeaderApp() {
   const headerRef = useRef(null);
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const isMobile = useBreakpointValue({ base: true, md: false });
+  const { user, isAuthenticated } = useAuth();
+  useEffect(() => {
+    const checkRoles = async () => {
+      // Retrasa ligeramente la ejecución para asegurar que `cached_roles` esté disponible
+      await new Promise((resolve) => setTimeout(resolve, 2000)); 
+      const dato = localStorage.getItem("cached_roles");
+
+      if (!dato && isAuthenticated) {
+        navigate("/persona-form");
+      }
+    };
+
+    checkRoles();
+  }, [isAuthenticated, navigate]);
   
-  const handleReportIssue = () => {
-    navigate('/report-issue');
-  };
-  const handleConsultaCanje = () => {
-    navigate('/consulta-canje');
-  };
-
-  const handlePublicarProducto = () => {
-    navigate('/publicar-producto');
-  };
-
-  const handleRegistrarVulnerable = () => {
-    navigate('/registro-vulnerable');
-  };
-  
-
   return (
-    <div ref={headerRef} className='header-container d-flex flex-row justify-content-around align-items-center vh-100'>
-      <div className='title-container'>
-        <h1 className='manrope-font fw-bold pb-4'>Heladeras <br></br>Comunitarias</h1>
-        <p className='text-wrap fs-5 fw-normal text-break w-50'>
+    <Flex
+      ref={headerRef}
+      className="header-container"
+      direction={{ base: 'column', md: 'row' }}
+      align="center"
+      justify="center"
+      minH="100vh"
+      bg="transparent"
+      p={8}
+    >
+      {/* Título y descripción */}
+      <Box
+        
+        className="title-container"
+        textAlign={{ base: 'center', md: 'left' }}
+        mb={{ base: 6, md: 0 }}
+      >
+        <Heading as="h1" size="2xl" mb={4} color="gray.800">
+          Heladeras <br /> Comunitarias
+        </Heading>
+        <Text fontSize="xl" color="gray.600" maxW="lg" mb={6}>
           Un espacio solidario para compartir alimentos con quienes más lo necesitan.
-        </p>
-        <div className='btn-group mt-4'>
-          <button className='btn btn-dark btn-lg me-3 flex-grow-1'>Doná</button>
-          <button className='btn btn-dark btn-lg flex-grow-1'>Sé Voluntario</button>
-        </div>
-      </div>
+        </Text>
+        <Flex
+          direction={{ base: 'column', md: 'row' }}
+          gap={3}
+          width="100%"
+          justify={{ base: 'center', md: 'start' }}
+        >
+          <Button
+            as={RouterLink}
+            to="/donacion-dinero"
+            colorScheme="gray"
+            bg="gray.800"
+            size="lg"
+            color="white"
+            _hover={{ bg: 'gray.700' }}
+            mb={{ base: 4, md: 0 }}
+          >
+            Doná
+          </Button>
+          <Button
+            as={RouterLink}
+            to="/distribucion-viandas"
+            colorScheme="gray"
+            bg="gray.800"
+            size="lg"
+            color="white"
+            _hover={{ bg: 'gray.700' }}
+          >
+            Sé Voluntario
+          </Button>
+        </Flex>
+      </Box>
 
-      <div className='image-container'>
-        <img src={HeaderImage} alt='Descripción' className='img-fluid' />
-      </div>
-    </div>
+      {/* Imagen */}
+      {!isMobile && (
+        <Box
+          className="image-container"
+          maxW="500px"
+          width="100%"
+          overflow="hidden"
+        >
+          <Image
+            src={HeaderImage}
+            alt="Heladeras Comunitarias"
+            boxSize="100%"
+            objectFit="cover"
+            p={2}
+          />
+        </Box>
+      )}
+    </Flex>
   );
 }
 

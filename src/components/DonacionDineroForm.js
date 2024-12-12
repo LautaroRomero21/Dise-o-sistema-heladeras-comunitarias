@@ -1,36 +1,101 @@
-import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
+import React, { useState } from "react";
+import { FormControl, FormLabel, Input, Button, Heading, Box, Text, Flex, useToast } from "@chakra-ui/react";
 import MercadoPago from "../assets/iconos/MercadoPago.svg";
 import PayPal from "../assets/iconos/PayPal.svg";
-import CreditCard from "../assets/iconos/CreditCard.svg"; // Fixed typo from "CreditCar.svg"
-import "../assets/styles/DonacionDineroForm.css";
+import CreditCard from "../assets/iconos/CreditCard.svg";
+import { useAuth } from "../config/authContext";
 
 function DonacionDineroForm() {
+  const [monto, setMonto] = useState("");
+  const [isLoading, setIsLoading] = useState(false); // Estado para manejar el spinner
+  const colaboradorUUID = localStorage.getItem("sub");
+  const { accessToken } = useAuth();
+  const toast = useToast();
+
+  const handleDonation = async () => {
+    setIsLoading(true); // Activar el spinner
+    try {
+      const response = await fetch("https://heladeras-dds-back.onrender.com/colaboraciones/donacion-dinero", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: new URLSearchParams({
+          monto,
+          colaboradorUUID,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.text();
+        toast({
+          title: "Donación realizada",
+          description: data || "Tu donación de dinero fue procesada exitosamente.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      } else {
+        const errorText = await response.text();
+        toast({
+          title: "Error",
+          description: errorText || "Ocurrió un error al procesar la donación.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      console.error("Error al realizar la donación:", error);
+      toast({
+        title: "Error de conexión",
+        description: "No se pudo conectar con el servidor para procesar la donación.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false); // Desactivar el spinner
+    }
+  };
+
   return (
-    <Form className="donacion-dinero-form">
-      <h1 className="form-title text-center">Donación de dinero</h1>
+    <Box backgroundColor="white" padding={6} borderRadius="md" boxShadow="lg" maxWidth="500px" width="100%">
+      <Heading as="h2" size="lg" textAlign="center" mb={4}>
+        Donación de dinero
+      </Heading>
 
-      <Form.Group controlId="monto" className="form-group">
-        <Form.Label>Monto:</Form.Label>
-        <Form.Control
+      <FormControl id="monto" mb={4}>
+        <FormLabel>Monto:</FormLabel>
+        <Input
           type="number"
-          name="monto"
           placeholder="Ingrese el monto a donar"
-          className="form-control"
+          value={monto}
+          onChange={(e) => setMonto(e.target.value)}
         />
-      </Form.Group>
+      </FormControl>
 
-      <h3 className="payment-methods-title">Doná con los siguientes métodos de pago:</h3>
-      <div className="payment-methods d-flex justify-content-around">
-        <img src={MercadoPago} alt="Mercado Pago" className="payment-icon" />
-        <img src={PayPal} alt="PayPal" className="payment-icon" />
-        <img src={CreditCard} alt="Tarjeta de Crédito" className="payment-icon" />
-      </div>
+      <Text fontSize="lg" mb={2}>
+        Doná con los siguientes métodos de pago:
+      </Text>
+      <Flex justifyContent="space-around" mb={6}>
+        <img src={MercadoPago} alt="Mercado Pago" width="50" />
+        <img src={PayPal} alt="PayPal" width="50" />
+        <img src={CreditCard} alt="Tarjeta de Crédito" width="50" />
+      </Flex>
 
-      <Button variant="primary" type="submit" className="submit-button btn-lg">
+      <Button
+        variant="solid"
+        colorScheme="green"
+        width="full"
+        onClick={handleDonation}
+        isLoading={isLoading} 
+        loadingText="Procesando" 
+      >
         Donar
       </Button>
-    </Form>
+    </Box>
   );
 }
 

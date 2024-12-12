@@ -1,162 +1,219 @@
 import React, { useState } from 'react';
-import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
-import '../assets/styles/VulnerableForm.css';
+import {
+    FormControl,
+    FormLabel,
+    Input,
+    Button,
+    Checkbox,
+    Stack,
+    NumberInput,
+    NumberInputField,
+    Box,
+    Heading,
+    useToast,
+} from '@chakra-ui/react';
+import { useAuth } from '../config/authContext';
 
-function VulnerableForm() {
-  const [formData, setFormData] = useState({
-    name: '',
-    LastName: '',
-    birthDate: '',
-    registrationDate: '',
-    isHomeless: false,
-    address: '',
-    documentType: '',
-    documentNumber: '',
-    hasMinors: false,
-    minorsCount: ''
-  });
-
-  const handleInputChange = (event) => {
-    const { name, value, type, checked } = event.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? checked : value
+const VulnerableForm = () => {
+    const [formData, setFormData] = useState({
+        name: '',
+        lastName: '',
+        birthDate: '',
+        isHomeless: false,
+        address: '',
+        hasMinors: false,
+        minorsCount: ''
     });
 
-    // Forzar actualización del DOM para evitar bucles del ResizeObserver
-    setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
-  };
+    const { accessToken } = useAuth();
+    const toast = useToast();
+    const colaboradorUUID = localStorage.getItem('sub');  // Obtener el UUID del colaborador desde el localStorage
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-
-    // Captura la fecha y hora actual como fecha de registro
-    const currentTimestamp = new Date().toISOString();
-
-    // Añadir la fecha de registro al formData antes de enviar
-    const dataToSubmit = {
-      ...formData,
-      registrationDate: currentTimestamp
+    const handleInputChange = (event) => {
+        const { name, value, type, checked } = event.target;
+        setFormData({
+            ...formData,
+            [name]: type === 'checkbox' ? checked : value
+        });
     };
 
-    console.log("Datos a enviar:", dataToSubmit);
-    // Enviar dataToSubmit a un backend o realizar otra acción
-  };
+    const handleSubmit = async (event) => {
+        event.preventDefault();
+    
+        // Validación de nombre y apellido: solo letras
+        const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+        if (!nameRegex.test(formData.name) || !nameRegex.test(formData.lastName)) {
+            toast({
+                title: "Error en los datos",
+                description: "El nombre y apellido solo deben contener letras.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+    
+        // Validación de fecha de nacimiento
+        const birthDate = new Date(formData.birthDate);
+        const today = new Date();
+        if (isNaN(birthDate) || birthDate > today) {
+            toast({
+                title: "Error en la fecha",
+                description: "Por favor, ingresa una fecha de nacimiento válida y no en el futuro.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+            return;
+        }
+    
+        // Transformar datos para enviar
+        const dataToSubmit = {
+            nombre: formData.name,
+            apellido: formData.lastName,
+            fechaNacimiento: formData.birthDate,
+            situacionCalle: formData.isHomeless,
+            direccion: formData.isHomeless ? '' : formData.address,
+            cantMenoresAcargo: formData.hasMinors ? parseInt(formData.minorsCount) : 0,
+        };
+    
+        try {
+            const url = `https://heladeras-dds-back.onrender.com/colaboraciones/persona-vulnerable?colaboradorUUID=${colaboradorUUID}`;
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${accessToken}`,
+                },
+                body: JSON.stringify(dataToSubmit),
+            });
+    
+            if (response.ok) {
+                const responseData = await response.text();
+                toast({
+                    title: "Registro exitoso",
+                    description: responseData || "Los datos de la persona vulnerable se registraron correctamente.",
+                    status: "success",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            } else {
+                const errorText = await response.text();
+                toast({
+                    title: "Error",
+                    description: errorText || "Ocurrió un error al registrar los datos.",
+                    status: "error",
+                    duration: 5000,
+                    isClosable: true,
+                });
+            }
+        } catch (error) {
+            console.error("Error al registrar los datos:", error);
+            toast({
+                title: "Error de conexión",
+                description: "No se pudo conectar con el servidor para registrar los datos.",
+                status: "error",
+                duration: 5000,
+                isClosable: true,
+            });
+        }
+    };
 
-  return (
-    <Form className="form-vulnerable" onSubmit={handleSubmit}>
-      <Form.Group className="mb-3" controlId="formBasicName">
-        <Form.Label>Nombre</Form.Label>
-        <Form.Control
-          type="text"
-          placeholder="Ingrese su nombre"
-          name="name"
-          value={formData.name}
-          onChange={handleInputChange}
-        />
-      </Form.Group>
+    return (
+        <Box backgroundColor="white" padding={6} borderRadius="md" boxShadow="lg" maxWidth="500px" width="100%">
+            <Heading as="h2" size="lg" textAlign="center" mb={4}>
+                Registro de Persona Vulnerable
+            </Heading>
 
-      <Form.Group controlId="formBasicLastName" className="mt-3">
-        <Form.Label>Apellido</Form.Label>
-        <Form.Control
-          type="text"
-          placeholder="Ingrese su Apellido"
-          name="LastName"
-          value={formData.LastName}
-          onChange={handleInputChange}
-        />
-      </Form.Group>
+            <form onSubmit={handleSubmit}>
+                <Stack spacing={4}>
+                    <FormControl id="name" isRequired>
+                        <FormLabel>Nombre</FormLabel>
+                        <Input
+                            type="text"
+                            placeholder="Ingrese su nombre"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleInputChange}
+                        />
+                    </FormControl>
 
-      <Form.Group controlId="formBasicBirthDate" className="mt-3">
-        <Form.Label>Fecha de Nacimiento</Form.Label>
-        <Form.Control
-          type="date"
-          name="birthDate"
-          value={formData.birthDate}
-          onChange={handleInputChange}
-        />
-      </Form.Group>
+                    <FormControl id="lastName" isRequired>
+                        <FormLabel>Apellido</FormLabel>
+                        <Input
+                            type="text"
+                            placeholder="Ingrese su Apellido"
+                            name="lastName"
+                            value={formData.lastName}
+                            onChange={handleInputChange}
+                        />
+                    </FormControl>
 
-      <Form.Group controlId="formBasicIsHomeless" className="mt-3">
-        <Form.Check
-          type="checkbox"
-          label="¿En situación de calle?"
-          name="isHomeless"
-          checked={formData.isHomeless}
-          onChange={handleInputChange}
-        />
-      </Form.Group>
+                    <FormControl id="birthDate" isRequired>
+                        <FormLabel>Fecha de Nacimiento</FormLabel>
+                        <Input
+                            type="date"
+                            name="birthDate"
+                            value={formData.birthDate}
+                            onChange={handleInputChange}
+                        />
+                    </FormControl>
 
-      {!formData.isHomeless && (
-        <Form.Group controlId="formBasicAddress" className="mt-3">
-          <Form.Label>Domicilio</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Ingrese su domicilio"
-            name="address"
-            value={formData.address}
-            onChange={handleInputChange}
-          />
-        </Form.Group>
-      )}
+                    <FormControl id="isHomeless">
+                        <Checkbox
+                            name="isHomeless"
+                            isChecked={formData.isHomeless}
+                            onChange={handleInputChange}
+                        >
+                            ¿En situación de calle?
+                        </Checkbox>
+                    </FormControl>
 
-      <Form.Group controlId="formBasicDocumentType" className="mt-3">
-        <Form.Label>Tipo de Documento</Form.Label>
-        <Form.Control
-          as="select"
-          name="documentType"
-          value={formData.documentType}
-          onChange={handleInputChange}
-        >
-          <option value="">Seleccione...</option>
-          <option value="DNI">DNI</option>
-          <option value="Pasaporte">Pasaporte</option>
-          <option value="Otro">Otro</option>
-        </Form.Control>
-      </Form.Group>
+                    {!formData.isHomeless && (
+                        <FormControl id="address">
+                            <FormLabel>Domicilio</FormLabel>
+                            <Input
+                                type="text"
+                                placeholder="Ingrese su domicilio"
+                                name="address"
+                                value={formData.address}
+                                onChange={handleInputChange}
+                            />
+                        </FormControl>
+                    )}
 
-      <Form.Group controlId="formBasicDocumentNumber" className="mt-3">
-        <Form.Label>Número de Documento</Form.Label>
-        <Form.Control
-          type="text"
-          placeholder="Ingrese su número de documento"
-          name="documentNumber"
-          value={formData.documentNumber}
-          onChange={handleInputChange}
-        />
-      </Form.Group>
+                    <FormControl id="hasMinors">
+                        <Checkbox
+                            name="hasMinors"
+                            isChecked={formData.hasMinors}
+                            onChange={handleInputChange}
+                        >
+                            ¿Posee menores a cargo?
+                        </Checkbox>
+                    </FormControl>
 
-      <Form.Group controlId="formBasicHasMinors" className="mt-3">
-        <Form.Check
-          type="checkbox"
-          label="¿Posee menores a cargo?"
-          name="hasMinors"
-          checked={formData.hasMinors}
-          onChange={handleInputChange}
-        />
-      </Form.Group>
+                    {formData.hasMinors && (
+                        <FormControl id="minorsCount">
+                            <FormLabel>Cantidad de menores a cargo</FormLabel>
+                            <NumberInput
+                                name="minorsCount"
+                                value={formData.minorsCount}
+                                onChange={(valueString) =>
+                                    setFormData({ ...formData, minorsCount: valueString })
+                                }
+                            >
+                                <NumberInputField placeholder="Ingrese la cantidad de menores" />
+                            </NumberInput>
+                        </FormControl>
+                    )}
 
-      {formData.hasMinors && (
-        <Form.Group controlId="formBasicMinorsCount" className="mt-3">
-          <Form.Label>Cantidad de menores a cargo</Form.Label>
-          <Form.Control
-            type="number"
-            placeholder="Ingrese la cantidad de menores"
-            name="minorsCount"
-            value={formData.minorsCount}
-            onChange={handleInputChange}
-          />
-        </Form.Group>
-      )}
-
-      <Form.Group className="mt-3">
-        <Button variant="primary" type="submit">
-          Registrar
-        </Button>
-      </Form.Group>
-    </Form>
-  );
-}
+                    <Button colorScheme="green" width="full" type="submit">
+                        Registrar
+                    </Button>
+                </Stack>
+            </form>
+        </Box>
+    );
+};
 
 export default VulnerableForm;

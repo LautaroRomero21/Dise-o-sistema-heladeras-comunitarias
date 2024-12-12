@@ -1,92 +1,276 @@
-import React, { useState } from 'react';
-import Form from 'react-bootstrap/Form';
-import ContactMethod from './ContactMethod';
+import React, { useState } from "react";
+import {
+  Box,
+  FormControl,
+  FormLabel,
+  Input,
+  Select,
+  Textarea,
+  Button,
+  VStack,
+  Heading,
+  useToast,
+  CheckboxGroup,
+  Checkbox,
+  HStack,
+} from "@chakra-ui/react";
+import { useAuth } from "../config/authContext";
+import { useNavigate } from "react-router-dom";
 
-function LegalForm({ formData, handleInputChange, setFormData }) {
-  const [contactMethod, setContactMethod] = useState('');
+function LegalForm({ onBack }) {
+  const { accessToken, userSub, logout } = useAuth();
+  const navigate = useNavigate();
+  const [id , setDd] = useState("");
+  const colaboradorUUID = userSub;
+  const [formData, setFormData] = useState({
+    companyName: "",
+    organizationType: "",
+    category: "",
+    contactMethods: [],
+    email: "",
+    whatsapp: "",
+    telegram: "",
+    contactInfo: "",
+    address: "",
+  });
+  const dto = {
+    razonSocial: formData.companyName,
+    tipo: formData.organizationType,
+    rubro: formData.category,
+    email: formData.email,
+    mediosContacto: formData.contactMethods,
+    whatsapp: formData.whatsapp,
+    telegram: formData.telegram,
+    direccion: formData.address,
+  };
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
 
-  const handleContactMethodChange = (event) => {
-    setContactMethod(event.target.value);
+  const [contactMethod, setContactMethod] = useState("");
+  const toast = useToast();
+
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const handleContactInfoChange = (newData) => {
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
-      [contactMethod]: newData
+      contactInfo: newData,
     }));
   };
-  
-  return (
-    <>
-      <Form.Group controlId="formBasicCompanyName">
-        <Form.Label>Razón Social</Form.Label>
-        <Form.Control
-          type="text"
-          placeholder="Razón Social"
-          name="companyName"
-          value={formData.companyName || ''} // Handle undefined value
-          onChange={handleInputChange}
-        />
-      </Form.Group>
-      <Form.Group className='mt-2 mb-3' controlId="formBasicType">
-        <Form.Label>Tipo</Form.Label>
-        <Form.Select
-          aria-label="Tipo Organización"
-          name="organizationType"
-          value={formData.organizationType || ''} // Handle undefined value
-          onChange={handleInputChange}
-        >
-          <option value="">Seleccione...</option>
-          <option value="Gubernamental">Gubernamental</option>
-          <option value="ONG">ONG</option>
-          <option value="Empresa">Empresa</option>
-          <option value="Institución">Institución</option>
-        </Form.Select>
-      </Form.Group>
-      <Form.Group className='mt-2 mb-2' controlId="formBasicCategory">
-        <Form.Label>Rubro</Form.Label>
-        <Form.Control
-          type="text"
-          placeholder="Rubro"
-          name="category"
-          value={formData.category || ''} // Handle undefined value
-          onChange={handleInputChange}
-        />
-      </Form.Group>
-      <Form.Group className='mt-2 mb-3' controlId="formBasicContactMethod">
-        <Form.Label>Seleccione un Método de Contacto</Form.Label>
-        <Form.Select
-          aria-label="Método de Contacto"
-          value={contactMethod}
-          onChange={handleContactMethodChange}
-        >
-          <option value="">Seleccione...</option>
-          <option value="emailContact">Email</option>
-          <option value="telefono">Teléfono</option>
-          <option value="whatsapp">WhatsApp</option>
-        </Form.Select>
-      </Form.Group>
 
-      {contactMethod && (
-        <Form.Group className='mt-3' controlId="formBasicContactInfo">
-          <ContactMethod
-            type={contactMethod}
-            formData={formData}
-            setFormData={handleContactInfoChange} 
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    if (!formData.companyName || !formData.organizationType) {
+      toast({
+        title: "Error",
+        description: "Por favor, completa todos los campos obligatorios.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+    if (formData.contactMethods.length <= 0) {
+      toast({
+        title: "Error",
+        description: "Por favor, selecciona al menos un método de contacto.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    try {
+      // Realizar la solicitud POST
+      console.log("Enviando formulario:", dto);
+      const response = await fetch("https://heladeras-dds-back.onrender.com/users/personaJuridica", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(dto),
+      });
+  
+      // Manejar la respuesta
+      if (!response.ok) {
+        throw new Error(`Error en la solicitud: ${response.statusText}`);
+      }
+    const message = await response.text();
+    const idMatch = message.match(/ID: (\d+)/);
+    if (idMatch && idMatch[1]) {
+    const id = idMatch[1]; // Aquí tienes el ID extraído
+    console.log("ID de la persona Juridica creada:", id);
+    setDd(id);
+  } else {
+    throw new Error("No se pudo extraer el ID de la respuesta.");
+  }
+      console.log("enviando crear colaborador con uuid ", colaboradorUUID);
+      const rta = await fetch(`https://heladeras-dds-back.onrender.com/roles/crear-colaborador?colaboradorUUID=${colaboradorUUID}&id=${id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      if (!rta.ok) {
+        throw new Error(`Error en la solicitud: ${rta.statusText}`);
+      }
+      toast({
+        title: "Alta Exitosa",
+        description: "Porfavor vuelve a iniciar sesión, no olvides verificar tu email",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+      setTimeout(() => {
+        logout();
+      }, 3000);
+    } catch (error) {
+      // Manejar errores
+      console.error("Error al enviar el formulario:", error);
+  
+      toast({
+        title: "Error",
+        description: "Hubo un problema al enviar el formulario. Por favor, inténtalo de nuevo.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
+  };
+
+  return (
+    <Box as="form" onSubmit={handleSubmit} p={6} borderWidth={1} borderRadius="md" boxShadow="md">
+      <VStack spacing={4} align="stretch">
+        <Heading size="lg" textAlign="center" mb={4}>
+          Registro Persona Jurídica
+        </Heading>
+        <FormControl isRequired>
+          <FormLabel>Razón Social</FormLabel>
+          <Input
+            type="text"
+            placeholder="Razón Social"
+            name="companyName"
+            value={formData.companyName}
+            onChange={handleInputChange}
           />
-        </Form.Group>
-      )}
-      <Form.Group className='mb-3' controlId="formBasicAddress">
-        <Form.Label>Dirección (opcional)</Form.Label>
-        <Form.Control
-          type="text"
-          placeholder="Ingrese su dirección"
-          name="address"
-          value={formData.address || ''} // Handle undefined value
-          onChange={handleInputChange}
-        />
-      </Form.Group>
-    </>
+        </FormControl>
+
+        <FormControl isRequired>
+          <FormLabel>Tipo</FormLabel>
+          <Select
+            placeholder="Seleccione el tipo de organización"
+            name="organizationType"
+            value={formData.organizationType}
+            onChange={handleInputChange}
+          >
+            <option value="Gubernamental">Gubernamental</option>
+            <option value="ONG">ONG</option>
+            <option value="Empresa">Empresa</option>
+            <option value="Institución">Institución</option>
+          </Select>
+        </FormControl>
+
+        <FormControl isRequired>
+          <FormLabel>Rubro</FormLabel>
+          <Input
+            type="text"
+            placeholder="Rubro"
+            name="category"
+            value={formData.category}
+            onChange={handleInputChange}
+          />
+        </FormControl>
+
+        
+        <FormLabel>Métodos de Contacto</FormLabel>
+          <CheckboxGroup
+            value={formData.contactMethods}
+            onChange={(values) => setFormData({ ...formData, contactMethods: values })}
+          >
+            <HStack align="start">
+              
+              <Checkbox value="EMAIL">Email</Checkbox>
+              <Checkbox value="WHATSAPP">WhatsApp</Checkbox>
+              <Checkbox value="TELEGRAM">Telegram</Checkbox>
+            </HStack>
+          </CheckboxGroup>
+      
+
+        {formData.contactMethods.includes("EMAIL") && (
+          <FormControl isRequired>
+            <FormLabel>Correo Electrónico</FormLabel>
+            <Input
+              type="email"
+              placeholder="Ingrese su correo electrónico"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+            />
+          </FormControl>
+        )}
+
+        {formData.contactMethods.includes("TELEGRAM") && (
+          <FormControl isRequired>
+            <FormLabel>Telegram</FormLabel>
+            <Input
+              type="text"
+              placeholder="Ingrese su chat ID de Telegram"
+              name="telegram"
+              value={formData.telegram}
+              onChange={handleChange}
+            />
+          </FormControl>
+        )}
+
+        {formData.contactMethods.includes("WHATSAPP") && (
+          <FormControl isRequired>
+            <FormLabel>WhatsApp</FormLabel>
+            <Input
+              type="tel"
+              placeholder="Ingrese su número de WhatsApp"
+              name="whatsapp"
+              value={formData.whatsapp}
+              onChange={handleChange}
+            />
+          </FormControl>
+        )}
+
+        <FormControl>
+          <FormLabel>Dirección (opcional)</FormLabel>
+          <Textarea
+            placeholder="Ingrese su dirección"
+            name="address"
+            value={formData.address}
+            onChange={handleInputChange}
+          />
+        </FormControl>
+
+        <Button type="submit" colorScheme="green" size="lg" width="full">
+          Registrar
+        </Button>
+        <Button
+            type="button"
+            colorScheme="blue"
+            onClick={onBack} // Redirigir a la página de selección
+          >
+            Volver atrás
+          </Button>
+      </VStack>
+    </Box>
   );
 }
 
