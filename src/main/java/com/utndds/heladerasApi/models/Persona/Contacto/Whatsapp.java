@@ -1,22 +1,22 @@
 package com.utndds.heladerasApi.models.Persona.Contacto;
 
+import com.utndds.heladerasApi.services.NotificacionApis.WhatsappApi;
+
 import jakarta.persistence.*;
 
 @Entity
 @DiscriminatorValue("WHATSAPP")
 public class Whatsapp extends Contacto {
-    @Column(name = "numero")
-    private String numero;
-
     public Whatsapp() {
     }
 
     public Whatsapp(String numero) {
-        this.numero = numero;
+        this.valor = numero;
     }
 
     @Override
     public void notificar(String mensaje) {
-        System.out.println("SE NOTIFICO CON EXITO AL WHATSAPP: " + this.numero);
+        String numero = this.valor;
+        WhatsappApi.sendTextMessage(mensaje, numero);
     }
 }

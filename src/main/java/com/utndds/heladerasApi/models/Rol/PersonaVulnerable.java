@@ -3,19 +3,18 @@ package com.utndds.heladerasApi.models.Rol;
 import java.time.LocalDate;
 
 import com.utndds.heladerasApi.models.Persona.Persona;
-import com.utndds.heladerasApi.models.Tarjetas.TarjetaPersVuln.TarjetaPersVuln;
+import com.utndds.heladerasApi.models.Tarjetas.TarjetaPersVuln;
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "persona_vulnerable")
 public class PersonaVulnerable extends Rol {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    @Getter
-    @Setter
+
     private Long id;
     @Column(name = "fecha_registro")
     private LocalDate fechaRegistro;
@@ -39,14 +38,6 @@ public class PersonaVulnerable extends Rol {
         this.fechaRegistro = LocalDate.now();
         this.situacionCalle = situacionCalle;
         this.cantMenoresAcargo = cantMenoresAcargo;
-    }
-
-    public void setTarjeta(TarjetaPersVuln tarjeta) {
-        this.tarjeta = tarjeta;
-    }
-
-    public int getCantMenoresAcargo() {
-        return cantMenoresAcargo;
     }
 
 }

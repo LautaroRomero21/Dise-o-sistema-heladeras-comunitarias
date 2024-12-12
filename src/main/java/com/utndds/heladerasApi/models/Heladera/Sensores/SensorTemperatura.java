@@ -4,16 +4,18 @@ import com.utndds.heladerasApi.models.Heladera.Heladera;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "sensor_temperatura")
 public class SensorTemperatura extends Sensor {
     @Getter
+    @Setter
     @Column(name = "temperatura")
     private Double temperatura;
 
     // Constructor vacío para JPA
-    protected SensorTemperatura() {
+    public SensorTemperatura() {
     }
 
     public SensorTemperatura(Heladera heladera) {

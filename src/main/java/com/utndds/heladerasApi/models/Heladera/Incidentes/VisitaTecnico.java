@@ -2,10 +2,16 @@ package com.utndds.heladerasApi.models.Heladera.Incidentes;
 
 import java.time.LocalDate;
 
-import com.google.protobuf.compiler.PluginProtos.CodeGeneratorResponse.File;
-import com.utndds.heladerasApi.models.Rol.Tecnico;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.utndds.heladerasApi.models.Heladera.Incidentes.Incidente.Incidente;
+import com.utndds.heladerasApi.models.Rol.Tecnico.Tecnico;
 
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 @Entity
 @Table(name = "visita_tecnico")
 public class VisitaTecnico {
@@ -18,6 +24,7 @@ public class VisitaTecnico {
     private LocalDate fecha;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonBackReference
     @JoinColumn(name = "tecnico")
     private Tecnico tecnico;
 
@@ -29,7 +36,7 @@ public class VisitaTecnico {
     private String descripcion;
 
     @Column(name = "foto")
-    private File foto;
+    private String foto;
 
     @Column(name = "arreglado")
     private boolean arreglado;
@@ -38,22 +45,17 @@ public class VisitaTecnico {
     public VisitaTecnico() {
     }
 
-    public VisitaTecnico(LocalDate fecha, Tecnico tecnico, Incidente incidente, String descripcion,
-            File foto, boolean arreglado) {
-        this.fecha = fecha;
+    public VisitaTecnico(Tecnico tecnico, Incidente incidente, String descripcion,
+            String foto, boolean arreglado) {
+        this.fecha = LocalDate.now();
         this.tecnico = tecnico;
         this.incidente = incidente;
         this.descripcion = descripcion;
         this.foto = foto;
         this.arreglado = arreglado;
 
-        this.procesar();
-    }
-
-    private void procesar() {
-        this.incidente.agregarVisita(this);
-        this.tecnico.agregarVisita(this);
         this.verificarArreglo();
+
     }
 
     private void verificarArreglo() {
@@ -62,6 +64,5 @@ public class VisitaTecnico {
         } else {
             System.out.println("Se arregla otra visita");
         }
-
     }
 }

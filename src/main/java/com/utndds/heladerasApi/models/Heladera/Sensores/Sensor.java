@@ -3,8 +3,10 @@ package com.utndds.heladerasApi.models.Heladera.Sensores;
 import com.utndds.heladerasApi.models.Heladera.Heladera;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Sensor {
@@ -14,8 +16,8 @@ public abstract class Sensor {
     private Long id;
 
     @Getter
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "heladera")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "heladera", nullable = false)
     protected Heladera heladera;
 
     // Constructor vacío para JPA

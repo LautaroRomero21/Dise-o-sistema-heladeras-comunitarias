@@ -1,28 +1,36 @@
 package com.utndds.heladerasApi.models.Rol;
 
-import com.utndds.heladerasApi.models.ONG.ONG;
 import com.utndds.heladerasApi.models.Persona.Persona;
 import com.utndds.heladerasApi.models.Persona.Contacto.Contacto;
-
+import com.utndds.heladerasApi.models.Rol.Tecnico.Tecnico;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Getter;
-
+import lombok.Setter;
 import jakarta.persistence.*;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = Tecnico.class, name = "tecnico"),
+        @JsonSubTypes.Type(value = Colaborador.class, name = "colaborador")
+})
+@Setter
+@Getter
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED) // Estrategia de herencia
+@Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "rol")
 public abstract class Rol {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     protected Long id;
-    @Getter
-    @ManyToOne(fetch = FetchType.LAZY)
+
+    @Column(name = "UUID", unique = true)
+    protected String UUID;
+
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "persona")
     protected Persona persona;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ong") // Nombre de la columna que se refiere a la ONG
-    private ONG ong;
 
     // Constructor vacío para JPA
     protected Rol() {

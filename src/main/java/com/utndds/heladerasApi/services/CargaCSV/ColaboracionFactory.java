@@ -2,16 +2,15 @@ package com.utndds.heladerasApi.services.CargaCSV;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import com.utndds.heladerasApi.models.Colaboraciones.Colaboracion;
 import com.utndds.heladerasApi.models.Colaboraciones.DistribucionViandas;
 import com.utndds.heladerasApi.models.Colaboraciones.DonacionDinero;
-import com.utndds.heladerasApi.models.Colaboraciones.DonacionVianda;
 import com.utndds.heladerasApi.models.Colaboraciones.RegistroPersonaVulnerable;
-import com.utndds.heladerasApi.models.Heladera.Vianda;
+import com.utndds.heladerasApi.models.Colaboraciones.DonacionViandas.DonacionVianda;
+import com.utndds.heladerasApi.models.Colaboraciones.DonacionViandas.Vianda;
 import com.utndds.heladerasApi.models.Rol.Colaborador;
 import com.utndds.heladerasApi.models.Rol.PersonaVulnerable;
-import com.utndds.heladerasApi.models.Tarjetas.TarjetaPersVuln.TarjetaPersVuln;
+import com.utndds.heladerasApi.models.Tarjetas.TarjetaPersVuln;
 
 public class ColaboracionFactory {
     public List<Colaboracion> crearColaboracion(String[] registro, Colaborador colaborador) {

@@ -22,8 +22,11 @@ public class PersonaJuridica extends Persona {
     public PersonaJuridica() {
     }
 
-    public PersonaJuridica(String direccion, List<Contacto> mediosContacto, String razonSocial, String tipo,
-            String rubro) {
+    public PersonaJuridica(String direccion ,List<Contacto> mediosContacto) {
+        super(direccion, mediosContacto);
+    }
+
+    public PersonaJuridica(String direccion, List<Contacto> mediosContacto, String razonSocial, String tipo, String rubro) {
         super(direccion, mediosContacto);
         this.razonSocial = razonSocial;
         this.tipo = tipo;
@@ -34,28 +37,4 @@ public class PersonaJuridica extends Persona {
     public String getNombre() {
         return this.razonSocial;
     };
-
-    public String getRazonSocial() {
-        return razonSocial;
-    }
-
-    public void setRazonSocial(String razonSocial) {
-        this.razonSocial = razonSocial;
-    }
-
-    public String getRubro() {
-        return rubro;
-    }
-
-    public void setRubro(String rubro) {
-        this.rubro = rubro;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
 }

@@ -2,8 +2,11 @@ package com.utndds.heladerasApi.models.Colaboraciones;
 
 import com.utndds.heladerasApi.models.Heladera.Heladera;
 
+import com.utndds.heladerasApi.models.Rol.Colaborador;
 import jakarta.persistence.*;
+import lombok.Getter;
 
+@Getter
 @Entity
 public class ObtencionHeladera extends Colaboracion {
 
@@ -15,15 +18,9 @@ public class ObtencionHeladera extends Colaboracion {
     public ObtencionHeladera() {
     }
 
-    @Override
-    protected void procesar() {
-        super.procesar();
-        System.out.println(
-                "SE GUARDO LA OBTENCION DE HELADERA POR PARTE DE: " + this.colaborador.getPersona().getNombre());
-    }
-
-    public Heladera getHeladera() {
-        return heladera;
+    public ObtencionHeladera(Colaborador colaborador, Heladera heladera) {
+        super(colaborador);
+        this.heladera = heladera;
     }
 
 }

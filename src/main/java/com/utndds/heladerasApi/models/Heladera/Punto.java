@@ -27,7 +27,10 @@ public class Punto {
     private String direccion;
 
     public Punto() {
-        // Constructor vacío requerido por Spring para deserialización JSON
+
+    }
+    public  String getNombrePunto() {
+        return direccion;
     }
 
     public Punto(double latitud, double longitud, String nombre, String direccion) {

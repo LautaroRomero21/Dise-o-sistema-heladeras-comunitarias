@@ -3,13 +3,14 @@
 Tecnologías Utilizadas
 
     Backend:
-        Spring Boot
         Java 17
-
+        Spring 
+       
     Frontend:
         React
         React Bootstrap
         React Google Maps API
+        React Auth0
 
     Gestor de Paquetes:
         Yarn
@@ -31,17 +32,12 @@ Prerrequisitos
     Java 17
     Node.js (incluye npm) 
     Yarn
-Dependencias 
-    Yarn add react-bootstrap
-    yarn add @react-google-maps/api 
 
 Clonar el Repositorio
 
     Clona el repositorio para el backend:
 
     Clona el repositorio para el front : git clone https://github.com/PonceCamilo/tp-anual-disenio.git
-
-
 
 
 Este contiene el backend en su raíz.
@@ -61,6 +57,7 @@ Instalación de Dependencias
     En la carpeta donde clonaste el front, instala las dependencias y ejecuta la aplicación utilizando:
     yarn add react-bootstrap
     yarn add @react-google-maps/api
+    yarn add @auth0/auth0-react
 
 
 En la carpeta donde clonaste el frontend (tp-anual-disenio con la rama front-end), abre una terminal y ejecuta:

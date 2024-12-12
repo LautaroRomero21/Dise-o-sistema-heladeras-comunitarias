@@ -2,18 +2,18 @@ package com.utndds.heladerasApi.models.Colaboraciones;
 
 import com.utndds.heladerasApi.models.Rol.Colaborador;
 import com.utndds.heladerasApi.models.Rol.PersonaVulnerable;
-import com.utndds.heladerasApi.models.Tarjetas.TarjetaPersVuln.TarjetaPersVuln;
+import com.utndds.heladerasApi.models.Tarjetas.TarjetaPersVuln;
 
 import jakarta.persistence.*;
 
 @Entity
 public class RegistroPersonaVulnerable extends Colaboracion {
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "persona_vulnerable")
     private PersonaVulnerable personaVuln;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "tarjeta_pers_vuln")
     private TarjetaPersVuln tarjeta;
 
@@ -25,19 +25,6 @@ public class RegistroPersonaVulnerable extends Colaboracion {
         super(colaborador);
         this.personaVuln = personaVuln;
         this.tarjeta = tarjeta;
-    }
-
-    @Override
-    protected void procesar() {
-        super.procesar();
-        if (this.personaVuln != null && this.tarjeta != null) {
-            this.personaVuln.setTarjeta(this.tarjeta);
-            this.tarjeta.setDueño(this.personaVuln);
-            System.out.println("SE GUARDO EL REGISTRO DE PERSONA VULNERABLE POR PARTE DE: "
-                    + this.colaborador.getPersona().getNombre());
-        } else {
-            System.out.println("Error: personaVuln o tarjeta es null");
-        }
     }
 
 }

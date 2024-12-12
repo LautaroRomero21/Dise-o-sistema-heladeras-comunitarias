@@ -9,7 +9,10 @@ import com.utndds.heladerasApi.models.Rol.Colaborador;
 import com.utndds.heladerasApi.models.Suscripciones.Evento.Evento;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity
 public class Suscripcion implements ObservadorSuscripcion {
 
@@ -27,30 +30,22 @@ public class Suscripcion implements ObservadorSuscripcion {
     private Colaborador colaborador;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "suscripcion")
-    private List<Evento> notificacionesDeseadas = new ArrayList<>();
+    private List<Evento> notificacionesDeseadas = new ArrayList<>();;
 
     // Constructor vacío para JPA
     public Suscripcion() {
     }
 
-    public Suscripcion(Heladera heladera, Colaborador colaborador) {
+    public Suscripcion(Heladera heladera, Colaborador colaborador, List<Evento> notificacionesDeseadas) {
         this.heladera = heladera;
         this.colaborador = colaborador;
-
-        this.procesar();
+        this.notificacionesDeseadas = notificacionesDeseadas;
     }
 
-    public void verificarNotificaciones(Heladera heladera) {
-        // FALTA IMPLEMENTAR
-    };
-
-    private void procesar() {
-        this.heladera.agregarSuscripcion(this);
-        this.colaborador.agregarSuscripcion(this);
-    };
-
     public void verificarNotificaciones() {
+        System.out.println("Verificando notificaciones para la heladera: " + this.heladera.getId());
         for (Evento evento : notificacionesDeseadas) {
+            System.out.println("Verificando evento: " + evento.getId());
             evento.verificarEvento(this.heladera);
         }
     }
